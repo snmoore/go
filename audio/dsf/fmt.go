@@ -94,8 +94,11 @@ var fmtChannelType = map[uint32]string{
 }
 
 // Channel order corresponding to the ChannelType field.
+// The mapping for mono is undefined in the specification, but using center
+// seems reasonable and allows an easy way to check for mismatch between the
+// ChannelType and ChannelNum fields.
 var fmtChannelOrder = map[uint32][]audio.Channel{
-	1: {},
+	1: {audio.Center},
 	2: {audio.FrontLeft, audio.FrontRight},
 	3: {audio.FrontLeft, audio.FrontRight, audio.Center},
 	4: {audio.FrontLeft, audio.FrontRight, audio.BackLeft, audio.BackRight},
@@ -188,6 +191,9 @@ func (d *decoder) readFmtChunk() error {
 	if !ok {
 		return fmt.Errorf("fmt: bad channel num: %v\nfmt chunk: % x", channelNum, d.fmt)
 	}
+	if channelNum != uint32(len(order)) {
+		return fmt.Errorf("fmt: mismatch between channel type %v and channel num %v:\nfmt chunk: % x", channelType, channelNum, d.fmt)
+	}
 
 	// Sampling frequency
 	samplingFrequency := binary.LittleEndian.Uint32(d.fmt.SamplingFrequency[:])
@@ -215,13 +221,13 @@ func (d *decoder) readFmtChunk() error {
 	// Reserved
 	reserved := binary.LittleEndian.Uint32(d.fmt.Reserved[:])
 	if reserved != fmtReserved {
-		return fmt.Errorf("fmt: bad reserved bytes: %v\nfmt chunk: % x", reserved, d.fmt)
+		return fmt.Errorf("fmt: bad reserved bytes: %#x\nfmt chunk: % x", reserved, d.fmt)
 	}
 
 	// Log the fields of the chunk (only active if a log output has been set)
 	d.logger.Print("\nFmt Chunk\n=========\n")
 	d.logger.Printf("Chunk header:              %q\n", header)
-	d.logger.Printf("Size of this chunk:        %v\n", size)
+	d.logger.Printf("Size of this chunk:        %v bytes\n", size)
 	d.logger.Printf("Format version:            %v\n", formatVersion)
 	d.logger.Printf("Format id:                 %v\n", formatId)
 	d.logger.Printf("Channel type:              %v (%s)\n", channelType, channelTypeString)
@@ -240,7 +246,7 @@ func (d *decoder) readFmtChunk() error {
 	d.logger.Printf("Sampling frequency:        %vHz (%s)\n", samplingFrequency, samplingFrequencyString)
 	d.logger.Printf("Bits per sample:           %v\n", bitsPerSample)
 	d.logger.Printf("Sample count:              %v\n", sampleCount)
-	d.logger.Printf("Block size per channel:    %v\n", blockSize)
+	d.logger.Printf("Block size per channel:    %v bytes\n", blockSize)
 
 	// Store the information that is useful
 	d.audio.Encoding = audio.DSD

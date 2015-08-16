@@ -17,11 +17,16 @@ func (d *decoder) readMetadataChunk() error {
 		return err
 	}
 
-	// Log the fields of the chunk (only active if a log output has been set)
-	d.logger.Print("\nMetadata Chunk\n==============\n")
-	d.logger.Printf("Chunk header:              %q\n", d.audio.Metadata[:10])
-	d.logger.Printf("Size of this chunk:        %v\n", len(d.audio.Metadata))
-	d.logger.Printf("Metadata:                  % x...\n", d.audio.Metadata[:20])
+	if len(d.audio.Metadata) > 0 {
+		// Log the fields of the chunk (only active if a log output has been set)
+		d.logger.Print("\nMetadata Chunk\n==============\n")
+		d.logger.Printf("Size of metadata:          %v bytes\n", len(d.audio.Metadata))
+		n := len(d.audio.Metadata)
+		if n > 20 {
+			n = 20
+		}
+		d.logger.Printf("Metadata:                  % x...\n", d.audio.Metadata[:n])
+	}
 
 	return nil
 }

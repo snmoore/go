@@ -53,31 +53,32 @@ func (d *decoder) readDSDChunk() error {
 	// Size of this chunk
 	size := binary.LittleEndian.Uint64(d.dsd.Size[:])
 	if size != dsdChunkSize {
-		return fmt.Errorf("dsd: bad chunk size: %v\ndsd chunk: % x", size, d.dsd)
+		return fmt.Errorf("dsd: bad chunk size: %v bytes\ndsd chunk: % x", size, d.dsd)
 	}
 
 	// Total file size
 	totalFileSize := binary.LittleEndian.Uint64(d.dsd.TotalFileSize[:])
 	if totalFileSize < (dsdChunkSize + fmtChunkSize + dataChunkSize) {
-		return fmt.Errorf("dsd: bad total file size: %v\ndsd chunk: % x", totalFileSize, d.dsd)
+		return fmt.Errorf("dsd: bad total file size: %v bytes\ndsd chunk: % x", totalFileSize, d.dsd)
 	}
 
 	// Pointer to Metadata chunk
 	metadataPointer := binary.LittleEndian.Uint64(d.dsd.MetadataPointer[:])
-	if metadataPointer >= totalFileSize {
-		return fmt.Errorf("dsd: bad pointer to metadata chunk: %v\ndsd chunk: % x", metadataPointer, d.dsd)
+	if metadataPointer != 0 {
+		if metadataPointer >= totalFileSize || metadataPointer <= (dsdChunkSize+fmtChunkSize+dataChunkSize) {
+			return fmt.Errorf("dsd: bad pointer to metadata chunk: %v bytes\ndsd chunk: % x", metadataPointer, d.dsd)
+		} else {
+			// Prepare the audio.Audio in d to hold the metadata
+			d.audio.Metadata = make([]byte, totalFileSize-metadataPointer)
+		}
 	}
 
 	// Log the fields of the chunk (only active if a log output has been set)
 	d.logger.Print("\nDSD Chunk\n=========\n")
 	d.logger.Printf("Chunk header:              %q\n", header)
-	d.logger.Printf("Size of this chunk:        %v\n", size)
-	d.logger.Printf("Total file size:           %v\n", totalFileSize)
+	d.logger.Printf("Size of this chunk:        %v bytes\n", size)
+	d.logger.Printf("Total file size:           %v bytes\n", totalFileSize)
 	d.logger.Printf("Pointer to Metadata chunk: %v\n", metadataPointer)
-
-	// Prepare the audio.Audio in d to hold the metadata
-	length := totalFileSize - metadataPointer
-	d.audio.Metadata = make([]byte, length)
 
 	return nil
 }

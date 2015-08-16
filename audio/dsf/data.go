@@ -63,7 +63,13 @@ func (d *decoder) readDataChunk() error {
 	d.logger.Print("\nData Chunk\n==========\n")
 	d.logger.Printf("Chunk header:              %q\n", header)
 	d.logger.Printf("Size of this chunk:        %v\n", size)
-	d.logger.Printf("Sample data:               % x...\n", d.audio.EncodedSamples[:20])
+	if len(d.audio.EncodedSamples) > 0 {
+		n := len(d.audio.EncodedSamples)
+		if n > 20 {
+			n = 20
+		}
+		d.logger.Printf("Sample data:               % x...\n", d.audio.EncodedSamples[:n])
+	}
 
 	return nil
 }
