@@ -1,6 +1,6 @@
 # Go packages and commands
 
-This contains work in progress - see TODO.md for details.
+This contains work in progress - see [TODO.md](/TODO.md) for details.
 
 ## Package audio 
 Implements a basic audio library with support for the following audio file formats:
