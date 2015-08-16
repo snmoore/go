@@ -11,5 +11,6 @@ Implements a DSF (DSD Stream File) audio decoder and encoder. See "DSF File Form
 
 # Command dsfinfo
 Reads a DSF (DSD Stream File) and prints information about its contents.
+    
     Usage:
         dsfinfo file
