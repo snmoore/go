@@ -24,19 +24,19 @@ var validDataChunk = []byte{
 
 // Table of all data chunk tests
 var dataChunkTests = []test{
-	// Chunk header: should be "data"
-	{"Reading a data chunk that has an invalid chunk header (bad byte) should result in an error", 0, []byte{'s', 'a', 't', 'a'}, true},
-	{"Reading a data chunk that has an invalid chunk header (uppercase) should result in an error", 0, []byte{'D', 'A', 'T', 'A'}, true},
-	{"Reading a data chunk that has a valid chunk header should not result in an error", 0, []byte{'d', 'a', 't', 'a'}, false},
-
-	// Chunk size: should be 12 bytes plus the size of the sample data
-	{"Reading a data chunk that has an invalid chunk size (too small) should result in an error", 4, []byte{11}, true},
-	{"Reading a data chunk that has a valid chunk size should not result in an error", 4, []byte{12}, false},
-
-	// Sample data: this needs special handing so is tested separately
-
-	// Sanity check: valid DSD chunk
-	{"Reading a valid data chunk should not result in an error", 0, []byte{}, false},
+//	// Chunk header: should be "data"
+//	{"Reading a data chunk that has an invalid chunk header (bad byte) should result in an error", 0, []byte{'s', 'a', 't', 'a'}, true},
+//	{"Reading a data chunk that has an invalid chunk header (uppercase) should result in an error", 0, []byte{'D', 'A', 'T', 'A'}, true},
+//	{"Reading a data chunk that has a valid chunk header should not result in an error", 0, []byte{'d', 'a', 't', 'a'}, false},
+//
+//	// Chunk size: should be 12 bytes plus the size of the sample data
+//	{"Reading a data chunk that has an invalid chunk size (too small) should result in an error", 4, []byte{11}, true},
+//	{"Reading a data chunk that has a valid chunk size should not result in an error", 4, []byte{12}, false},
+//
+//	// Sample data: this needs special handing so is tested separately
+//
+//	// Sanity check: valid DSD chunk
+//	{"Reading a valid data chunk should not result in an error", 0, []byte{}, false},
 }
 
 // Run all tests
