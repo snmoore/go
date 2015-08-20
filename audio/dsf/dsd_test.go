@@ -27,10 +27,12 @@ var validDsdChunk = []byte{
 
 // Table of all DSD chunk tests
 var dsdChunkTests = []test{
-//	// Chunk header: should be "fmt "
+//	// Chunk header: should be "DSD "
 //	{"Reading a DSD chunk that has an invalid chunk header (bad last byte) should result in an error", 0, []byte{'D', 'S', 'D', 'x'}, true},
 //	{"Reading a DSD chunk that has an invalid chunk header (lowercase) should result in an error", 0, []byte{'d', 's', 'd', ' '}, true},
 //	{"Reading a DSD chunk that has a valid chunk header should not result in an error", 0, []byte{'D', 'S', 'D', ' '}, false},
+//	{"Encountering a fmt chunk whilst reading a DSD chunk should result in an error", 0, []byte{'f', 'm', 't', ' '}, true},
+//	{"Encountering a data chunk whilst reading a DSD chunk should result in an error", 0, []byte{'d', 'a', 't', 'a'}, true},
 //
 //	// Chunk size: should be 28 bytes
 //	{"Reading a DSD chunk that has an invalid chunk size (size - 1) should result in an error", 4, []byte{27}, true},
@@ -66,11 +68,11 @@ func TestDsd(t *testing.T) {
 
 	// Run each test
 	for i, test := range dsdChunkTests {
-		// Start with a valid fmt chunk
+		// Start with a valid chunk
 		c := make([]byte, len(validDsdChunk))
 		copy(c, validDsdChunk)
 
-		// Patch the test data into the valid fmt chunk
+		// Patch the test data into the valid chunk
 		copy(c[test.offset:], test.data)
 
 		// Read the chunk

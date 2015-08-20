@@ -150,8 +150,15 @@ func (d *decoder) readFmtChunk() error {
 
 	// Chunk header
 	header := string(d.fmt.Header[:])
-	if header != fmtChunkHeader {
-		return fmt.Errorf("fmt: bad chunk header: %q\nfmt chunk: % x", header, d.fmt)
+	switch header {
+	case fmtChunkHeader:
+		// This is the expected chunk header
+	case dsdChunkHeader:
+		return fmt.Errorf("dsd: expected fmt chunk but found DSD chunk")
+	case dataChunkHeader:
+		return fmt.Errorf("dsd: expected fmt chunk but found data chunk")
+	default:
+		return fmt.Errorf("dsd: bad chunk header: %q\ndsd chunk: % x", header, d.dsd)
 	}
 
 	// Size of this chunk

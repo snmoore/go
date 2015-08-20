@@ -28,6 +28,8 @@ var dataChunkTests = []test{
 //	{"Reading a data chunk that has an invalid chunk header (bad byte) should result in an error", 0, []byte{'s', 'a', 't', 'a'}, true},
 //	{"Reading a data chunk that has an invalid chunk header (uppercase) should result in an error", 0, []byte{'D', 'A', 'T', 'A'}, true},
 //	{"Reading a data chunk that has a valid chunk header should not result in an error", 0, []byte{'d', 'a', 't', 'a'}, false},
+//	{"Encountering a DSD chunk whilst reading a data chunk should result in an error", 0, []byte{'D', 'S', 'D', ' '}, true},
+//	{"Encountering a fmt chunk whilst reading a data chunk should result in an error", 0, []byte{'f', 'm', 't', ' '}, true},
 //
 //	// Chunk size: should be 12 bytes plus the size of the sample data
 //	{"Reading a data chunk that has an invalid chunk size (too small) should result in an error", 4, []byte{11}, true},

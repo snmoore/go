@@ -46,7 +46,14 @@ func (d *decoder) readDSDChunk() error {
 
 	// Chunk header
 	header := string(d.dsd.Header[:])
-	if header != dsdChunkHeader {
+	switch header {
+	case dsdChunkHeader:
+		// This is the expected chunk header
+	case fmtChunkHeader:
+		return fmt.Errorf("dsd: expected DSD chunk but found fmt chunk")
+	case dataChunkHeader:
+		return fmt.Errorf("dsd: expected DSD chunk but found data chunk")
+	default:
 		return fmt.Errorf("dsd: bad chunk header: %q\ndsd chunk: % x", header, d.dsd)
 	}
 

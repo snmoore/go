@@ -5,10 +5,7 @@
 package dsf
 
 import (
-	//	"bytes"
-	//	"github.com/snmoore/go/audio"
 	"io/ioutil"
-	//	"log"
 	"os"
 	"testing"
 )
@@ -32,9 +29,9 @@ var readerTests = []readerTest{
 	{"Reading a DSD stream file that has missing chunks (no DSD) should result in an error", "test/invalid_missing_dsd.dsf", true},
 	{"Reading a DSD stream file that has missing chunks (no fmt) should result in an error", "test/invalid_missing_fmt.dsf", true},
 	{"Reading a DSD stream file that has missing chunks (no data) should result in an error", "test/invalid_missing_data.dsf", true},
-	{"Reading a DSD stream file that has duplicate chunks (multiple DSD) should result in an error", "test/invalid_multiple_dsd.dsf", true},
-	{"Reading a DSD stream file that has duplicate chunks (multiple fmt) should result in an error", "test/invalid_multiple_fmt.dsf", true},
-	{"Reading a DSD stream file that has duplicate chunks (multiple data) should result in an error", "test/invalid_multiple_data.dsf", true},
+	{"Reading a DSD stream file that has repeated chunks (multiple DSD) should result in an error", "test/invalid_multiple_dsd.dsf", true},
+	{"Reading a DSD stream file that has repeated chunks (multiple fmt) should result in an error", "test/invalid_multiple_fmt.dsf", true},
+	{"Reading a DSD stream file that has repeated chunks (multiple data) should result in an error", "test/invalid_multiple_data.dsf", true},
 
 	// Valid DSD stream file
 	{"Reading a valid DSD stream file (without metadata) should not result in an error", "test/valid_without_metadata.dsf", false},
@@ -77,7 +74,7 @@ func TestReader(t *testing.T) {
 			}
 		}
 
-		// // Close the DSD stream file
+		// Close the DSD stream file
 		if err := file.Close(); err != nil {
 			t.Errorf("FAIL Test %v: %v:\n%v", i, test.description, err.Error())
 		}

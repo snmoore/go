@@ -34,19 +34,22 @@ func (d *decoder) decode(r io.Reader, logTo io.Writer) error {
 	d.reader = r
 	d.audio = new(audio.Audio)
 
-	// Read the DSD stream file chunks
+	// 1st chunk should be DSD
 	if err := d.readDSDChunk(); err != nil {
 		return err
 	}
 
+	// 2nd chunk should be fmt
 	if err := d.readFmtChunk(); err != nil {
 		return err
 	}
 
+	// 3rd chunk should be data
 	if err := d.readDataChunk(); err != nil {
 		return err
 	}
 
+	// 4th chunk should be metadata, but may be omitted
 	if len(d.audio.Metadata) > 0 {
 		if err := d.readMetadataChunk(); err != nil {
 			return err

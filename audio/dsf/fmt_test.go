@@ -57,6 +57,8 @@ var fmtChunkTests = []test{
 //	{"Reading a fmt chunk that has an invalid chunk header (bad last byte) should result in an error", 0, []byte{'f', 'm', 't', 'x'}, true},
 //	{"Reading a fmt chunk that has an invalid chunk header (uppercase) should result in an error", 0, []byte{'F', 'M', 'T', ' '}, true},
 //	{"Reading a fmt chunk that has a valid chunk header should not result in an error", 0, []byte{'f', 'm', 't', ' '}, false},
+//	{"Encountering a DSD chunk whilst reading a fmt chunk should result in an error", 0, []byte{'D', 'S', 'D', ' '}, true},
+//	{"Encountering a data chunk whilst reading a fmt chunk should result in an error", 0, []byte{'d', 'a', 't', 'a'}, true},
 //
 //	// Chunk size: should be 52 bytes
 //	{"Reading a fmt chunk that has an invalid chunk size (size - 1) should result in an error", 4, []byte{51}, true},
@@ -143,11 +145,11 @@ func TestFmt(t *testing.T) {
 
 	// Run each test
 	for i, test := range fmtChunkTests {
-		// Start with a valid fmt chunk
+		// Start with a valid chunk
 		c := make([]byte, len(validFmtChunk))
 		copy(c, validFmtChunk)
 
-		// Patch the test data into the valid fmt chunk
+		// Patch the test data into the valid chunk
 		copy(c[test.offset:], test.data)
 
 		// Read the chunk
