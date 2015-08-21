@@ -25,7 +25,7 @@ var validDsdChunk = []byte{
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 }
 
-// Table of all DSD chunk tests
+// Table driven DSD chunk tests
 var dsdChunkTests = []test{
 	// Chunk header: should be "DSD "
 	{"Reading a DSD chunk that has an invalid chunk header (bad last byte) should result in an error", 0, []byte{'D', 'S', 'D', 'x'}, true},
@@ -53,7 +53,7 @@ var dsdChunkTests = []test{
 	{"Reading a valid DSD chunk should not result in an error", 0, []byte{}, false},
 }
 
-// Run all tests
+// Run the table driven tests
 func TestDsd(t *testing.T) {
 	// Prepare a decoder to use for all tests
 	var d decoder
@@ -95,5 +95,32 @@ func TestDsd(t *testing.T) {
 				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i, test.description)
 			}
 		}
+	}
+}
+
+// A read error whilst reading a DSD chunk should result in an error
+func TestDsdReadError(t *testing.T) {
+	description := "A read error whilst reading a DSD chunk should result in an error"
+
+	// Prepare a decoder to use
+	var d decoder
+	d.audio = new(audio.Audio)
+
+	// Only log the chunk contents if verbose is enabled
+	if testing.Verbose() {
+		d.logger = log.New(os.Stdout, "", 0)
+	} else {
+		d.logger = log.New(ioutil.Discard, "", 0)
+	}
+
+	// Read an empty chunk to force a read error
+	d.reader = bytes.NewReader([]byte{})
+	err := d.readDSDChunk()
+
+	// Reading the chunk should have thrown an error
+	if err == nil {
+		t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", len(dsdChunkTests)+1, description)
+	} else {
+		t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", len(dsdChunkTests)+1, description, err.Error())
 	}
 }

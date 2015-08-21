@@ -186,11 +186,8 @@ func (d *decoder) readFmtChunk() error {
 		return fmt.Errorf("fmt: bad channel type: %v\nfmt chunk: % x", channelType, d.fmt)
 	}
 
-	// Channel order corresponding to the ChannelType field.
-	order, ok := fmtChannelOrder[channelType]
-	if !ok {
-		return fmt.Errorf("fmt: mismatch between fmtChannelOrder and fmtChannelType")
-	}
+	// Channel order corresponding to the ChannelType field
+	order, _ := fmtChannelOrder[channelType]
 
 	// Channel num
 	channelNum := binary.LittleEndian.Uint32(d.fmt.ChannelNum[:])

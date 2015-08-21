@@ -22,7 +22,7 @@ var validDataChunk = []byte{
 	// Sample data: none present
 }
 
-// Table of all data chunk tests
+// Table driven data chunk tests
 var dataChunkTests = []test{
 	// Chunk header: should be "data"
 	{"Reading a data chunk that has an invalid chunk header (bad byte) should result in an error", 0, []byte{'s', 'a', 't', 'a'}, true},
@@ -41,7 +41,7 @@ var dataChunkTests = []test{
 	{"Reading a valid data chunk should not result in an error", 0, []byte{}, false},
 }
 
-// Run all tests
+// Run the table driven tests
 func TestData(t *testing.T) {
 	// Prepare a decoder to use for all tests
 	var d decoder
@@ -167,5 +167,32 @@ func TestDataSamplesRead(t *testing.T) {
 			t.Fatalf("FAIL Test %v: %v:\nIncorrect sample data at byte %v: %v != %v",
 				len(dataChunkTests)+2, description, j, d.audio.EncodedSamples[j], sample)
 		}
+	}
+}
+
+// A read error whilst reading a data chunk should result in an error
+func TestDataReadError(t *testing.T) {
+	description := "A read error whilst reading a data chunk should result in an error"
+
+	// Prepare a decoder to use
+	var d decoder
+	d.audio = new(audio.Audio)
+
+	// Only log the chunk contents if verbose is enabled
+	if testing.Verbose() {
+		d.logger = log.New(os.Stdout, "", 0)
+	} else {
+		d.logger = log.New(ioutil.Discard, "", 0)
+	}
+
+	// Read an empty chunk to force a read error
+	d.reader = bytes.NewReader([]byte{})
+	err := d.readDataChunk()
+
+	// Reading the chunk should have thrown an error
+	if err == nil {
+		t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", len(dataChunkTests)+3, description)
+	} else {
+		t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", len(dataChunkTests)+3, description, err.Error())
 	}
 }

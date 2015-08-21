@@ -51,7 +51,7 @@ type test struct {
 	expectError bool
 }
 
-// Table of all fmt chunk tests
+// Table driven fmt chunk tests
 var fmtChunkTests = []test{
 	// Chunk header: should be "fmt "
 	{"Reading a fmt chunk that has an invalid chunk header (bad last byte) should result in an error", 0, []byte{'f', 'm', 't', 'x'}, true},
@@ -130,7 +130,7 @@ var fmtChunkTests = []test{
 	{"Reading a valid fmt chunk should not result in an error", 0, []byte{}, false},
 }
 
-// Run all tests
+// Run the table driven tests
 func TestFmt(t *testing.T) {
 	// Prepare a decoder to use for all tests
 	var d decoder
@@ -172,5 +172,32 @@ func TestFmt(t *testing.T) {
 				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i, test.description)
 			}
 		}
+	}
+}
+
+// A read error whilst reading a fmt chunk should result in an error
+func TestFmtReadError(t *testing.T) {
+	description := "A read error whilst reading a fmt chunk should result in an error"
+
+	// Prepare a decoder to use
+	var d decoder
+	d.audio = new(audio.Audio)
+
+	// Only log the chunk contents if verbose is enabled
+	if testing.Verbose() {
+		d.logger = log.New(os.Stdout, "", 0)
+	} else {
+		d.logger = log.New(ioutil.Discard, "", 0)
+	}
+
+	// Read an empty chunk to force a read error
+	d.reader = bytes.NewReader([]byte{})
+	err := d.readFmtChunk()
+
+	// Reading the chunk should have thrown an error
+	if err == nil {
+		t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", len(fmtChunkTests)+1, description)
+	} else {
+		t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", len(fmtChunkTests)+1, description, err.Error())
 	}
 }
