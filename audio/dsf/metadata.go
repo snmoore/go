@@ -6,6 +6,7 @@ package dsf
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 // readMetadataChunk reads the metadata chunk and stores the result in d. This
@@ -15,6 +16,19 @@ func (d *decoder) readMetadataChunk() error {
 	err := binary.Read(d.reader, binary.LittleEndian, &d.audio.Metadata)
 	if err != nil {
 		return err
+	}
+
+	// Check this is not just another DSD, fmt or data chunk
+	header := string(d.audio.Metadata[:4])
+	switch header {
+	case dsdChunkHeader:
+		return fmt.Errorf("metadata: expected metadata chunk but found DSD chunk")
+	case fmtChunkHeader:
+		return fmt.Errorf("metadata: expected metadata chunk but found fmt chunk")
+	case dataChunkHeader:
+		return fmt.Errorf("metadata: expected metadata chunk but found data chunk")
+	default:
+		// Anything else is acceptable
 	}
 
 	if len(d.audio.Metadata) > 0 {

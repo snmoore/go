@@ -59,6 +59,7 @@ var fmtChunkTests = []test{
 	{"Reading a fmt chunk that has a valid chunk header should not result in an error", 0, []byte{'f', 'm', 't', ' '}, false},
 	{"Encountering a DSD chunk whilst reading a fmt chunk should result in an error", 0, []byte{'D', 'S', 'D', ' '}, true},
 	{"Encountering a data chunk whilst reading a fmt chunk should result in an error", 0, []byte{'d', 'a', 't', 'a'}, true},
+	{"Encountering a metadata chunk whilst reading a fmt chunk should result in an error", 0, []byte{'I', 'D', '3', 0x03}, true},
 
 	// Chunk size: should be 52 bytes
 	{"Reading a fmt chunk that has an invalid chunk size (size - 1) should result in an error", 4, []byte{51}, true},
@@ -131,7 +132,7 @@ var fmtChunkTests = []test{
 }
 
 // Run the table driven tests
-func TestFmt(t *testing.T) {
+func TestFmtRead(t *testing.T) {
 	// Prepare a decoder to use for all tests
 	var d decoder
 	d.audio = new(audio.Audio)
@@ -160,16 +161,16 @@ func TestFmt(t *testing.T) {
 		if test.expectError {
 			// Reading the chunk should have thrown an error
 			if err == nil {
-				t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", i, test.description)
+				t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", i+1, test.description)
 			} else {
-				t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", i, test.description, err.Error())
+				t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", i+1, test.description, err.Error())
 			}
 		} else {
 			// Reading the chunk should not have thrown an error
 			if err != nil {
-				t.Errorf("FAIL Test %v: %v:\nWant: nil\nActual: %v", i, test.description, err.Error())
+				t.Errorf("FAIL Test %v: %v:\nWant: nil\nActual: %v", i+1, test.description, err.Error())
 			} else {
-				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i, test.description)
+				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i+1, test.description)
 			}
 		}
 	}

@@ -13,8 +13,106 @@ import (
 	"testing"
 )
 
+// A valid metadata chunk i.e. an ID3v2.3.0 tag
+var validMetadataChunk = []byte{
+	// File identifier: "ID3"
+	'I', 'D', '3',
+	// Major version: 3
+	0x03,
+	// Revision number: 0
+	0x00,
+	// Flags: none
+	0x00,
+	// Size: 0 bytes, excludes the tag header
+	0x00, 0x00, 0x00, 0x00,
+}
+
+// Table driven metadata chunk tests
+var metadataChunkTests = []test{
+	{"Encountering a DSD chunk whilst reading a metadata chunk should result in an error", 0, []byte{'D', 'S', 'D', ' '}, true},
+	{"Encountering a fmt chunk whilst reading a metadata chunk should result in an error", 0, []byte{'f', 'm', 't', ' '}, true},
+	{"Encountering a data chunk whilst reading a metadata chunk should result in an error", 0, []byte{'d', 'a', 't', 'a'}, true},
+}
+
+// Run the table driven tests
+func TestMetadataRead(t *testing.T) {
+	// Prepare a decoder to use for all tests
+	var d decoder
+	d.audio = new(audio.Audio)
+
+	// Only log the chunk contents if verbose is enabled
+	if testing.Verbose() {
+		d.logger = log.New(os.Stdout, "", 0)
+	} else {
+		d.logger = log.New(ioutil.Discard, "", 0)
+	}
+
+	// Run each test
+	for i, test := range metadataChunkTests {
+		// Start with a valid chunk
+		c := make([]byte, len(validMetadataChunk))
+		copy(c, validMetadataChunk)
+
+		// Patch the test data into the valid chunk
+		copy(c[test.offset:], test.data)
+
+		// Read the chunk
+		d.audio.Metadata = make([]byte, len(validMetadataChunk))
+		d.reader = bytes.NewReader(c)
+		err := d.readMetadataChunk()
+
+		// Check the result from reading the chunk
+		if test.expectError {
+			// Reading the chunk should have thrown an error
+			if err == nil {
+				t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", i+1, test.description)
+			} else {
+				t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", i+1, test.description, err.Error())
+			}
+		} else {
+			// Reading the chunk should not have thrown an error
+			if err != nil {
+				t.Errorf("FAIL Test %v: %v:\nWant: nil\nActual: %v", i+1, test.description, err.Error())
+			} else {
+				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i+1, test.description)
+			}
+		}
+	}
+}
+
+// A read error whilst reading a metadata chunk should result in an error
+func TestMetadataReadError(t *testing.T) {
+	description := "A read error whilst reading a metadata chunk should result in an error"
+
+	// Prepare a decoder to use
+	var d decoder
+	d.audio = new(audio.Audio)
+
+	// Only log the chunk contents if verbose is enabled
+	if testing.Verbose() {
+		d.logger = log.New(os.Stdout, "", 0)
+	} else {
+		d.logger = log.New(ioutil.Discard, "", 0)
+	}
+
+	// Prepare the decoder to expect 1024 bytes of metadata
+	// This is normally done when reading a DSD chunk, omitted in this test
+	d.audio.Metadata = make([]byte, 1024)
+
+	// Read an empty chunk to force a read error
+	d.reader = bytes.NewReader([]byte{})
+	err := d.readMetadataChunk()
+
+	// Reading the chunk should have thrown an error
+	if err == nil {
+		t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", len(metadataChunkTests)+1, description)
+	} else {
+		t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", len(metadataChunkTests)+1, description, err.Error())
+	}
+}
+
 // Reading a metadata chunk that has an insufficient number of bytes should result in an error
-func TestMetadataInsufficient(t *testing.T) {
+func TestMetadataReadInsufficientBytes(t *testing.T) {
 	description := "Reading a metadata chunk that has an insufficient number of bytes should result in an error"
 
 	// Prepare a decoder to use
@@ -36,14 +134,14 @@ func TestMetadataInsufficient(t *testing.T) {
 	d.reader = bytes.NewReader(c)
 	err := d.readDataChunk()
 	if err == nil {
-		t.Errorf("FAIL Test 1: %v:\nWant: error\nActual: nil", description)
+		t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", len(metadataChunkTests)+2, description)
 	} else {
-		t.Logf("PASS Test 1: %v:\nWant: error\nActual: %v", description, err.Error())
+		t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", len(metadataChunkTests)+2, description, err.Error())
 	}
 }
 
 // Bytes are read correctly from a metadata chunk
-func TestMetadataRead(t *testing.T) {
+func TestMetadataReadBytes(t *testing.T) {
 	description := "Samples are read correctly from a metadata chunk"
 
 	// Prepare 1024 bytes of metadata
@@ -75,9 +173,9 @@ func TestMetadataRead(t *testing.T) {
 	d.reader = bytes.NewReader(c)
 	err := d.readMetadataChunk()
 	if err != nil {
-		t.Fatalf("FAIL Test 2: %v:\nWant: nil\nActual: %v", description, err.Error())
+		t.Fatalf("FAIL Test %v: %v:\nWant: nil\nActual: %v", len(metadataChunkTests)+3, description, err.Error())
 	} else {
-		t.Logf("PASS Test 2: %v:\nWant: nil\nActual: nil", description)
+		t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", len(metadataChunkTests)+3, description)
 	}
 
 	// Verify the bytes were read correctly
@@ -86,36 +184,5 @@ func TestMetadataRead(t *testing.T) {
 			t.Fatalf("FAIL Test 2: %v:\nIncorrect metadata at byte %v: %v != %v",
 				description, j, d.audio.Metadata[j], b)
 		}
-	}
-}
-
-// A read error whilst reading a metadata chunk should result in an error
-func TestMetadataReadError(t *testing.T) {
-	description := "A read error whilst reading a metadata chunk should result in an error"
-
-	// Prepare a decoder to use
-	var d decoder
-	d.audio = new(audio.Audio)
-
-	// Only log the chunk contents if verbose is enabled
-	if testing.Verbose() {
-		d.logger = log.New(os.Stdout, "", 0)
-	} else {
-		d.logger = log.New(ioutil.Discard, "", 0)
-	}
-
-	// Prepare the decoder to expect 1024 bytes of metadata
-	// This is normally done when reading a DSD chunk, omitted in this test
-	d.audio.Metadata = make([]byte, 1024)
-
-	// Read an empty chunk to force a read error
-	d.reader = bytes.NewReader([]byte{})
-	err := d.readMetadataChunk()
-
-	// Reading the chunk should have thrown an error
-	if err == nil {
-		t.Errorf("FAIL Test 3: %v:\nWant: error\nActual: nil", description)
-	} else {
-		t.Logf("PASS Test 3: %v:\nWant: error\nActual: %v", description, err.Error())
 	}
 }

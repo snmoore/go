@@ -47,11 +47,11 @@ func (d *decoder) readDataChunk() error {
 	case dataChunkHeader:
 		// This is the expected chunk header
 	case dsdChunkHeader:
-		return fmt.Errorf("dsd: expected data chunk but found DSD chunk")
+		return fmt.Errorf("data: expected data chunk but found DSD chunk")
 	case fmtChunkHeader:
-		return fmt.Errorf("dsd: expected data chunk but found fmt chunk")
+		return fmt.Errorf("data: expected data chunk but found fmt chunk")
 	default:
-		return fmt.Errorf("dsd: bad chunk header: %q\ndsd chunk: % x", header, d.dsd)
+		return fmt.Errorf("data: bad chunk header: %q\ndata chunk: % x", header, d.data)
 	}
 
 	// Size of this chunk

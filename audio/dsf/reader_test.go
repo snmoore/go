@@ -30,9 +30,6 @@ var readerTests = []readerTest{
 	{"Reading a DSD stream file that has missing chunks (missing fmt) should result in an error", "test/invalid_missing_fmt.dsf", true},
 	{"Reading a DSD stream file that has missing chunks (missing data) should result in an error", "test/invalid_missing_data.dsf", true},
 	{"Reading a DSD stream file that has missing chunks (missing metadata) should result in an error", "test/invalid_missing_metadata.dsf", true},
-	{"Reading a DSD stream file that has repeated chunks (multiple DSD) should result in an error", "test/invalid_multiple_dsd.dsf", true},
-	{"Reading a DSD stream file that has repeated chunks (multiple fmt) should result in an error", "test/invalid_multiple_fmt.dsf", true},
-	{"Reading a DSD stream file that has repeated chunks (multiple data) should result in an error", "test/invalid_multiple_data.dsf", true},
 
 	// Valid DSD stream file
 	{"Reading a valid DSD stream file (without metadata) should not result in an error", "test/valid_without_metadata.dsf", false},
@@ -62,16 +59,16 @@ func TestReader(t *testing.T) {
 		if test.expectError {
 			// Reading the chunk should have thrown an error
 			if err == nil {
-				t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", i, test.description)
+				t.Errorf("FAIL Test %v: %v:\nWant: error\nActual: nil", i+1, test.description)
 			} else {
-				t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", i, test.description, err.Error())
+				t.Logf("PASS Test %v: %v:\nWant: error\nActual: %v", i+1, test.description, err.Error())
 			}
 		} else {
 			// Reading the chunk should not have thrown an error
 			if err != nil {
-				t.Errorf("FAIL Test %v: %v:\nWant: nil\nActual: %v", i, test.description, err.Error())
+				t.Errorf("FAIL Test %v: %v:\nWant: nil\nActual: %v", i+1, test.description, err.Error())
 			} else {
-				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i, test.description)
+				t.Logf("PASS Test %v: %v:\nWant: nil\nActual: nil", i+1, test.description)
 			}
 		}
 
