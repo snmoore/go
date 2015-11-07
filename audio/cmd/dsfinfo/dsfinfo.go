@@ -12,7 +12,6 @@ package main
 import (
 	"flag"
 	"github.com/snmoore/go/audio/dsf"
-	"io/ioutil"
 	"os"
 )
 
@@ -35,13 +34,7 @@ func main() {
 	}()
 
 	// Decode the DSD stream file with logging to stdout
-	audio, err := dsf.Decode(file, os.Stdout)
-	if err != nil {
-		panic(err)
-	}
-
-	// Encode the DSD stream file
-	err = dsf.Encode(audio, ioutil.Discard, os.Stdout)
+	_, err = dsf.Decode(file, os.Stdout)
 	if err != nil {
 		panic(err)
 	}
