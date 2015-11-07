@@ -57,8 +57,7 @@ func (d *decoder) readDataChunk() error {
 	// Size of this chunk
 	size := binary.LittleEndian.Uint64(d.data.Size[:])
 	if size != dataChunkSize+uint64(len(d.audio.EncodedSamples)) {
-		return fmt.Errorf("size: %v, dataChunkSize: %v, len: %v", size, dataChunkSize, len(d.audio.EncodedSamples))
-		//return fmt.Errorf("data: bad chunk size: %v\nfmt chunk: % x\ndata chunk: % x", size, d.fmt, d.data)
+		return fmt.Errorf("data: bad chunk size: %v\nfmt chunk: % x\ndata chunk: % x", size, d.fmt, d.data)
 	}
 
 	// Read the sample data directly into the audio.Audio in d
