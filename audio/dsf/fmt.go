@@ -261,9 +261,14 @@ func (d *decoder) readFmtChunk() error {
 	d.audio.BlockSize = uint(blockSize)
 
 	// Prepare the audio.Audio in d to hold the encoded samples
-	length := sampleCount / (8 / uint64(bitsPerSample))        // number of bytes per channel
-	length += uint64(blockSize) - (length % uint64(blockSize)) // round up to the block size
-	length *= uint64(channelNum)                               // number of channels
+	length := sampleCount
+	if bitsPerSample == 1 {
+		length = (length + 7) / 8 // fit up to 8 samples into 1 byte
+	}
+	if (length % uint64(blockSize)) > 0 { // pad to the block size
+		length += uint64(blockSize) - (length % uint64(blockSize))
+	}
+	length *= uint64(channelNum) // same amount for each channel
 	d.audio.EncodedSamples = make([]byte, length)
 
 	return nil
